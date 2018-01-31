@@ -15,10 +15,11 @@ from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QDialog
 from PyQt5.QtWidgets import QDialogButtonBox
 
 from figure_canvas import GravityModelCanvas
+from interactive import Moulder
 from new_dialog import NewModelDialog
 
 
-class Moulder(QMainWindow):
+class MoulderApp(QMainWindow):
 
     def __init__(self):
         super().__init__()
@@ -28,10 +29,10 @@ class Moulder(QMainWindow):
         self.init_ui()
         self.set_callbacks()
 
-        self.canvas = GravityModelCanvas(self,
-                                         width=5, height=4, dpi=100)
-        self.canvas.setFocus()
-        self.setCentralWidget(self.canvas)
+        #self.canvas = GravityModelCanvas(self,
+        #                                 width=5, height=4, dpi=100)
+        #self.canvas.setFocus()
+        #self.setCentralWidget(self.canvas)
 
     def closeEvent(self, event):
         event.ignore()
@@ -90,9 +91,12 @@ class Moulder(QMainWindow):
         new_model_dialog = NewModelDialog(parent=self)
         new_model_dialog.exec_()
         if new_model_dialog.is_completed():
-            self.canvas.x = new_model_dialog.x
-            self.canvas.z = new_model_dialog.z
-            self.canvas.update_plot()
+            x = new_model_dialog.x
+            z = new_model_dialog.z
+            area = (x.min(), x.max(), z.min(), 10000)
+            self.canvas = Moulder(self, area, x, z)
+            self.canvas.run()
+            self.setCentralWidget(self.canvas)
 
     def _quit_callback(self):
         answer = QMessageBox.question(self, "Quit",
@@ -105,6 +109,6 @@ class Moulder(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setApplicationName("Moulder")
-    moulder = Moulder()
+    moulder = MoulderApp()
     moulder.show()
     sys.exit(app.exec_())
