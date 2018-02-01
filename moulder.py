@@ -29,8 +29,8 @@ class MoulderApp(QMainWindow):
         self.init_ui()
         self.set_callbacks()
 
-        self.moulder = Moulder(self, numpy.linspace(0, 100, 11),
-                               numpy.zeros(11), 0, 10000,
+        self.moulder = Moulder(self, numpy.linspace(0, 100e3, 101),
+                               numpy.zeros(101), 0, 10000,
                                width=5, height=4, dpi=100)
         self.setCentralWidget(self.moulder)
 
