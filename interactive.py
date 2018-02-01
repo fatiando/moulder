@@ -25,118 +25,44 @@ from fatiando import utils
 from fatiando.gravmag import talwani
 from fatiando.mesher import Polygon
 
-
 LINE_ARGS = dict(
-            linewidth=2, linestyle='-', color='k', marker='o',
-            markerfacecolor='k', markersize=5, animated=False, alpha=0.6
-            )
+    linewidth=2, linestyle='-', color='k', marker='o',
+    markerfacecolor='k', markersize=5, animated=False, alpha=0.6)
+
 
 class Moulder(FigureCanvasQTAgg):
-    """
-    Interactive 2D forward modeling using polygons.
-
-    A matplotlib GUI application. Allows drawing and manipulating polygons and
-    computes their predicted data automatically. Also permits contaminating the
-    data with gaussian pseudo-random error for producing synthetic data sets.
-
-    Uses :mod:`fatiando.gravmag.talwani` for computations.
-
-    *Moulder* objects can be persisted to Python pickle files using the
-    :meth:`~fatiando.gravmag.interactive.Moulder.save` method and later
-    restored using :meth:`~fatiando.gravmag.interactive.Moulder.load`.
-
-    .. warning::
-
-        Cannot be used with ``%matplotlib inline`` on IPython notebooks because
-        the app uses the matplotlib plot window. You can still embed the
-        generated model and data figure on notebooks using the
-        :meth:`~fatiando.gravmag.interactive.Moulder.plot` method.
-
-    Parameters:
-
-    * area : list = (x1, x2, z1, z2)
-        The limits of the model drawing area, in meters.
-    * x, z : 1d-arrays
-        The x- and z-coordinates of the computation points (places where
-        predicted data will be computed). In meters.
-    * data : None or 1d-array
-        Observed data measured at *x* and *z*. Will plot this with black dots
-        along the predicted data.
-    * density_range : list = [min, max]
-        The minimum and maximum values allowed for the density. Determines the
-        limits of the density slider of the application. In kg.m^-3. Defaults
-        to [-2000, 2000].
-    * kwargs : dict
-        Other keyword arguments used to restore the state of the application.
-        Used by the :meth:`~fatiando.gravmag.interactive.Moulder.load` method.
-        Not intended for general use.
-
-    Examples:
-
-    Make the Moulder object and start the app::
-
-        import numpy as np
-        area = (0, 10e3, 0, 5e3)
-        # Calculate on 100 points
-        x = np.linspace(area[0], area[1], 100)
-        z = np.zeros_like(x)
-        app = Moulder(area, x, z)
-        app.run()
-        # This will pop-up a window with the application (like the screenshot
-        # below). Start drawing (follow the instruction in the figure title).
-        # When satisfied, close the window to resume execution.
-
-    .. image:: ../_static/images/Moulder-screenshot.png
-        :alt: Screenshot of the Moulder GUI
-
-
-    After closing the plot window, you can access the model and data from the
-    *Moulder* object::
-
-        app.model  # The drawn model as fatiando.mesher.Polygon
-        app.predicted  # 1d-array with the data predicted by the model
-        # You can save the predicted data to use later
-        app.save_predicted('data.txt')
-        # You can also save the application and resume it later
-        app.save('application.pkl')
-        # Close this session/IPython notebook/etc.
-        # To resume drawing later:
-        app = Moulder.load('application.pkl')
-        app.run()
-
-    """
 
     # The tolerance range for mouse clicks on vertices. In pixels.
     epsilon = 5
     # App instructions printed in the figure suptitle
     instructions = ' | '.join([
-        'n: New polygon', 'd: delete', 'click: select/move', 'esc: cancel'])
+        'n: New polygon', 'd: delete', 'click: select/move', 'a: add vertex',
+        'r: reset view', 'esc: cancel'])
 
-    def __init__(self, parent, width=5, height=4, dpi=100):
+    def __init__(self, parent, area, x, z, width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.fig)
         self.setParent(parent)
-        self._plotted = False
 
+        self._area = area
+        self._x, self._z = x, z
+        self._predicted = numpy.zeros_like(x)
+        self._data = None
         self.cmap = pyplot.cm.RdBu_r
+        self.canvas = self.fig.canvas
 
-        self._x = None
-        self._z = None
-        self._min_depth = 0
-        self._max_depth = 10000
-
-        self.predicted = None
-        self.error = None
-
-        self.predicted_line = []
-        self.data = None
         self.polygons = []
         self.lines = []
         self.densities = []
 
-    @property
-    def plotted(self):
-        return self._plotted
+        # Set arbitrary density and error values (only for first implementations)
+        # It will be determined by sliders/entries in MoulderApp
+        self._density = 100
+        self._error = 0
+
+        self._figure_setup()
+        self._init_markers()
+        self._connect()
 
     @property
     def x(self):
@@ -155,20 +81,43 @@ class Moulder(FigureCanvasQTAgg):
         self._z = numpy.asarray(new_value)
 
     @property
-    def min_depth(self):
-        return self._min_depth
+    def area(self):
+        return self._area
 
-    @min_depth.setter
-    def min_depth(self, new_value):
-        self._min_depth = new_value
+    @area.setter
+    def area(self, new_area):
+        self._area = new_area
 
     @property
-    def max_depth(self):
-        return self._max_depth
+    def data(self):
+        return self._data
 
-    @max_depth.setter
-    def max_depth(self, new_value):
-        self._max_depth = new_value
+    @data.setter
+    def data(self, new_data):
+        self._data = new_data
+
+    @property
+    def density(self):
+        return self._density
+
+    @density.setter
+    def density(self, new_value):
+        self._density = new_value
+
+    @property
+    def error(self):
+        return self._error
+
+    @error.setter
+    def error(self, new_value):
+        self._error = new_value
+
+    @property
+    def predicted(self):
+        self._predicted = talwani.gz(self.x, self.z, self.model)
+        if self.error > 0:
+            self._predicted = utils.contaminate(self.predicted, self.error)
+        return self._predicted
 
     @property
     def model(self):
@@ -179,9 +128,20 @@ class Moulder(FigureCanvasQTAgg):
              for p, d in zip(self.polygons, self.densities)]
         return m
 
-    def run(self):
-        self._figure_setup()
-        # Markers for mouse click events
+    def _figure_setup(self):
+        self.dataax, self.modelax = self.fig.subplots(2, 1, sharex=True)
+        self.dataax.set_ylabel("Gravity Anomaly [mGal]")
+        self.dataax.set_ylim((-200, 200))
+        self.dataax.grid(True)
+        self.modelax.set_xlabel("x [m]")
+        self.modelax.set_ylabel("z [m]")
+        self.modelax.set_xlim(self.area[:2])
+        self.modelax.set_ylim(self.area[2:])
+        self.modelax.grid(True)
+        self.modelax.invert_yaxis()
+        self.canvas.draw()
+
+    def _init_markers(self):
         self._ivert = None
         self._ipoly = None
         self._lastevent = None
@@ -189,15 +149,7 @@ class Moulder(FigureCanvasQTAgg):
         self._add_vertex = False
         self._xy = []
         self._drawing_plot = None
-        # Used to blit the model plot and make
-        # rendering faster
         self.background = None
-        # Connect event callbacks
-        self._connect()
-        self._update_data()
-        self._update_data_plot()
-        self.canvas.draw()
-        #pyplot.show()
 
     def _connect(self):
         """
@@ -206,46 +158,10 @@ class Moulder(FigureCanvasQTAgg):
         # Make the proper callback connections
         self.canvas.mpl_connect('button_press_event',
                                 self._button_press_callback)
-#        self.canvas.mpl_connect('key_press_event',
-#                                self._key_press_callback)
         self.canvas.mpl_connect('button_release_event',
                                 self._button_release_callback)
         self.canvas.mpl_connect('motion_notify_event',
                                 self._mouse_move_callback)
-
-    def _figure_setup(self, **kwargs):
-        """
-        Setup the plot figure with labels, titles, ticks, etc.
-
-        Sets the *canvas*, *dataax*, *modelax*, *polygons* and *lines*
-        attributes.
-
-        Parameters:
-
-        * kwargs : dict
-            Keyword arguments passed to ``pyplot.subplots``.
-
-        """
-        sharex = kwargs.get('sharex')
-        if not sharex:
-            kwargs['sharex'] = True
-        axes = self.fig.subplots(2, 1, **kwargs)
-        ax1, ax2 = axes
-        ax1.set_ylabel('Gravity anomaly (mGal)')
-        ax2.set_xlabel('x (m)', labelpad=-10)
-        ax1.set_xlim(self.x.min(), self.x.max())
-        ax1.set_ylim((-200, 200))
-        ax1.grid(True)
-        ax2.set_ylim(self.min_depth, self.max_depth)
-        ax2.grid(True)
-        ax2.invert_yaxis()
-        ax2.set_ylabel('z (m)')
-        #self.fig.subplots_adjust(top=0.95, left=0.1, right=0.95, bottom=0.06,
-        #                         hspace=0.1)
-        self.canvas = self.fig.canvas
-        self.dataax = axes[0]
-        self.modelax = axes[1]
-        self.fig.canvas.draw()
 
     def _density2color(self, density):
         """
@@ -292,23 +208,16 @@ class Moulder(FigureCanvasQTAgg):
         line = Line2D(x, y, **self.line_args)
         return poly, line
 
-    def _update_data(self):
-        """
-        Recalculate the predicted data (optionally with random error)
-        """
-        self.predicted = talwani.gz(self.x, self.z, self.model)
-        if self.error > 0:
-            self.predicted = utils.contaminate(self.predicted, self.error)
-
     def _update_data_plot(self):
         """
         Update the predicted data plot in the *dataax*.
 
         Adjusts the xlim of the axes to fit the data.
         """
-        self.predicted_line.set_ydata(self.predicted)
-        vmin = 1.2*min(self.predicted.min(), self.dmin)
-        vmax = 1.2*max(self.predicted.max(), self.dmax)
+        predicted = self.predicted
+        self.predicted_line.set_ydata(predicted)
+        vmin = 1.2*min(predicted.min(), self.dmin)
+        vmax = 1.2*max(predicted.max(), self.dmax)
         self.dataax.set_ylim(vmin, vmax)
         self.dataax.grid(True)
         self.canvas.draw()
@@ -318,7 +227,6 @@ class Moulder(FigureCanvasQTAgg):
         Callback when error slider is edited
         """
         self.error = value
-        self._update_data()
         self._update_data_plot()
 
     def _set_density_callback(self, value):
@@ -410,7 +318,7 @@ class Moulder(FigureCanvasQTAgg):
                 # and which vertice of which polygon
                 self._ipoly, self._ivert = self._get_polygon_vertice_id(event)
                 if self._ipoly is not None:
-                    self.density_slider.set_val(self.densities[self._ipoly])
+                    # self.density_slider.set_val(self.densities[self._ipoly])
                     self.polygons[self._ipoly].set_animated(True)
                     self.lines[self._ipoly].set_animated(True)
                     self.lines[self._ipoly].set_color([0, 1, 0, 0])
@@ -449,11 +357,10 @@ class Moulder(FigureCanvasQTAgg):
                 self.canvas.blit(self.modelax.bbox)
             elif event.button == 3:
                 if len(self._xy) >= 3:
-                    density = self.density_slider.val
-                    poly, line = self._make_polygon(self._xy, density)
+                    poly, line = self._make_polygon(self._xy, self.density)
                     self.polygons.append(poly)
                     self.lines.append(line)
-                    self.densities.append(density)
+                    self.densities.append(self.density)
                     self.modelax.add_patch(poly)
                     self.modelax.add_line(line)
                     self._drawing_plot.remove()
@@ -491,7 +398,7 @@ class Moulder(FigureCanvasQTAgg):
         self._update_data()
         self._update_data_plot()
 
-    def key_press_callback(self, event_key):
+    def _key_press_callback(self, event_key):
         """
         What to do when a key is pressed on the keyboard.
         """

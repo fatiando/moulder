@@ -3,7 +3,7 @@ from future.builtins import super
 
 import os
 import sys
-import numpy as np
+import numpy
 import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -29,19 +29,21 @@ class MoulderApp(QMainWindow):
         self.init_ui()
         self.set_callbacks()
 
-        self.canvas = Moulder(self, width=5, height=4, dpi=100)
+        self.canvas = Moulder(self, [0, 100, 0, 1000],
+                              numpy.linspace(0, 100, 11),
+                              numpy.zeros(11),
+                              width=5, height=4, dpi=100)
         #self.canvas = GravityModelCanvas(self,
         #                                 width=5, height=4, dpi=100)
         # self.canvas.setFocus()
         self.setCentralWidget(self.canvas)
 
     def keyPressEvent(self, event):
-        print(event)
         keys_dict = {Qt.Key_N: "n", Qt.Key_R: "r",
                      Qt.Key_A: "a", Qt.Key_D: "d",
                      Qt.Key_Escape: "escape"}
-        if self.canvas.plotted and event.key in keys_dict.keys():
-            self.canvas.key_press_callback(keys_dict[event.key])
+        if event.key in keys_dict.keys():
+            self.canvas._key_press_callback(keys_dict[event.key])
 
     def closeEvent(self, event):
         event.ignore()
