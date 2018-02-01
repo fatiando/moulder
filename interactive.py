@@ -135,6 +135,24 @@ class Moulder(FigureCanvasQTAgg):
         self.predicted_line, = self.dataax.plot(self.x, self.predicted, '-r')
         self._update_data_plot()
 
+    def set_error(self, value):
+        """
+        Callback when error slider is edited
+        """
+        self.error = value
+        self._update_data_plot()
+
+    def set_density(self, value):
+        """
+        Callback when density slider is edited
+        """
+        if self._ipoly is not None:
+            self.densities[self._ipoly] = value
+            self.polygons[self._ipoly].set_color(self._density2color(value))
+            # self._update_data()
+            self._update_data_plot()
+            self.canvas.draw()
+
     def _figure_setup(self):
         self.dataax, self.modelax = self.fig.subplots(2, 1, sharex=True)
         self.dataax.set_ylabel("Gravity Anomaly [mGal]")
@@ -229,24 +247,6 @@ class Moulder(FigureCanvasQTAgg):
         self.dataax.set_ylim(vmin, vmax)
         self.dataax.grid(True)
         self.canvas.draw()
-
-    def _set_error_callback(self, value):
-        """
-        Callback when error slider is edited
-        """
-        self.error = value
-        self._update_data_plot()
-
-    def _set_density_callback(self, value):
-        """
-        Callback when density slider is edited
-        """
-        if self._ipoly is not None:
-            self.densities[self._ipoly] = value
-            self.polygons[self._ipoly].set_color(self._density2color(value))
-            # self._update_data()
-            self._update_data_plot()
-            self.canvas.draw()
 
     def _get_polygon_vertice_id(self, event):
         """

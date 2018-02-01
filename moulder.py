@@ -1,4 +1,4 @@
-from __future__ import print_function
+from __future__ import print_function, division
 from future.builtins import super
 
 import os
@@ -12,11 +12,13 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy, QMainWindow, QApplication, QAction
 from PyQt5.QtWidgets import QMenu, QWidget, QVBoxLayout, QMessageBox
 from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QDialog
-from PyQt5.QtWidgets import QDialogButtonBox
+from PyQt5.QtWidgets import QDialogButtonBox, QDoubleSpinBox
 
 from figure_canvas import GravityModelCanvas
 from interactive import Moulder
 from configure_dialog import ConfigureMeassurementDialog
+
+DENSITY_RANGE = [-2000, 2000]
 
 
 class MoulderApp(QMainWindow):
@@ -31,6 +33,7 @@ class MoulderApp(QMainWindow):
 
         self.moulder = Moulder(self, numpy.linspace(0, 100e3, 101),
                                numpy.zeros(101), 0, 10000,
+                               density_range=DENSITY_RANGE,
                                width=5, height=4, dpi=100)
         self.setCentralWidget(self.moulder)
 
@@ -48,14 +51,22 @@ class MoulderApp(QMainWindow):
     def init_ui(self):
         self._define_actions()
         self._configure_menubar()
-        self._configure_toolbar()
+        self._configure_main_toolbar()
+        self._configure_secondary_toolbar()
 
     def set_callbacks(self):
         self.configure_action.triggered.connect(
             self._configure_meassurement_callback)
         self.about_action.triggered.connect(self._about_callback)
-        # self.file_menu.triggered.connect(self._file_menu_callback)
         self.quit_action.triggered.connect(self._quit_callback)
+        self.density_slider.valueChanged.connect(
+            self._spin_slider_changed_callback)
+        self.density_spinbox.valueChanged.connect(
+            self._spin_slider_changed_callback)
+        self.error_slider.valueChanged.connect(
+            self._spin_slider_changed_callback)
+        self.error_spinbox.valueChanged.connect(
+            self._spin_slider_changed_callback)
 
     def _define_actions(self):
         self.configure_action = QAction(QIcon.fromTheme('preferences-system'),
@@ -86,12 +97,48 @@ class MoulderApp(QMainWindow):
         self.about_menu = self.menubar.addMenu('About')
         self.about_menu.addAction(self.about_action)
 
-    def _configure_toolbar(self):
-        self.toolbar = self.addToolBar("adasd")
-        self.toolbar.addAction(self.open_action)
-        self.toolbar.addAction(self.save_action)
-        self.toolbar.addAction(self.save_as_action)
-        self.toolbar.addAction(self.configure_action)
+    def _configure_main_toolbar(self):
+        self.main_toolbar = self.addToolBar("Main Toolbar")
+        self.main_toolbar.addAction(self.open_action)
+        self.main_toolbar.addAction(self.save_action)
+        self.main_toolbar.addAction(self.save_as_action)
+        self.main_toolbar.addAction(self.configure_action)
+
+    def _configure_secondary_toolbar(self):
+        self.density_slider = QSlider(Qt.Horizontal)
+        self.density_slider.setMinimum(DENSITY_RANGE[0])
+        self.density_slider.setMaximum(DENSITY_RANGE[1])
+        self.density_slider.setValue(0)
+        self.density_slider.setTickInterval(
+            (DENSITY_RANGE[1] - DENSITY_RANGE[0])/2)
+        self.density_slider.setTickPosition(QSlider.TicksBelow)
+        self.density_spinbox = QDoubleSpinBox()
+        self.density_spinbox.setMinimum(DENSITY_RANGE[0])
+        self.density_spinbox.setMaximum(DENSITY_RANGE[1])
+        self.density_spinbox.setValue(0)
+        self.density_spinbox.setSingleStep(1)
+
+        self.error_slider = QSlider(Qt.Horizontal)
+        self.error_slider.setMinimum(0)
+        self.error_slider.setMaximum(100)
+        self.error_slider.setValue(0)
+        self.error_slider.setTickInterval(10)
+        self.error_slider.setTickPosition(QSlider.TicksBelow)
+        self.error_spinbox = QDoubleSpinBox()
+        self.error_spinbox.setMinimum(0)
+        self.error_spinbox.setMaximum(100)
+        self.error_spinbox.setValue(0)
+        self.error_spinbox.setSingleStep(0.1)
+
+        self.secondary_toolbar = self.addToolBar("Secondary Toolbar")
+        self.secondary_toolbar.setStyleSheet('QToolBar{spacing:10px;}')
+        self.secondary_toolbar.addWidget(QLabel("Density [kg/m^3]:"))
+        self.secondary_toolbar.addWidget(self.density_slider)
+        self.secondary_toolbar.addWidget(self.density_spinbox)
+        self.secondary_toolbar.addSeparator()
+        self.secondary_toolbar.addWidget(QLabel("Error:"))
+        self.secondary_toolbar.addWidget(self.error_slider)
+        self.secondary_toolbar.addWidget(self.error_spinbox)
 
     def _about_callback(self):
         QMessageBox.about(self, "About Moulder",
@@ -103,6 +150,21 @@ class MoulderApp(QMainWindow):
         if configure_dialog.is_completed():
             self.moulder.set_meassurement_points(configure_dialog.x,
                                                  configure_dialog.z)
+
+    def _spin_slider_changed_callback(self, value):
+        sender = self.sender()
+        if sender == self.density_slider:
+            self.density_spinbox.setValue(value)
+            self.moulder.set_density(value)
+        elif sender == self.density_spinbox:
+            self.density_slider.setValue(value)
+            self.moulder.set_density(value)
+        elif sender == self.error_slider:
+            self.error_spinbox.setValue(value)
+            self.moulder.set_error(value)
+        elif sender == self.error_spinbox:
+            self.error_slider.setValue(value)
+            self.moulder.set_error(value)
 
     def _quit_callback(self):
         answer = QMessageBox.question(self, "Quit",
