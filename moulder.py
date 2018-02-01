@@ -30,11 +30,8 @@ class MoulderApp(QMainWindow):
         self.set_callbacks()
 
         self.moulder = Moulder(self, numpy.linspace(0, 100, 11),
-                               numpy.zeros(11), 0, 1000,
+                               numpy.zeros(11), 0, 10000,
                                width=5, height=4, dpi=100)
-        #self.moulder = GravityModelCanvas(self,
-        #                                 width=5, height=4, dpi=100)
-        # self.moulder.setFocus()
         self.setCentralWidget(self.moulder)
 
     def keyPressEvent(self, event):
@@ -82,16 +79,19 @@ class MoulderApp(QMainWindow):
         self.file_menu = self.menubar.addMenu('File')
         self.file_menu.addAction(self.open_action)
         self.file_menu.addAction(self.save_action)
+        self.file_menu.addAction(self.save_as_action)
         self.file_menu.addAction(self.quit_action)
+        self.edit_menu = self.menubar.addMenu('Edit')
+        self.edit_menu.addAction(self.configure_action)
         self.about_menu = self.menubar.addMenu('About')
         self.about_menu.addAction(self.about_action)
 
     def _configure_toolbar(self):
         self.toolbar = self.addToolBar("adasd")
-        self.toolbar.addAction(self.configure_action)
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.save_action)
         self.toolbar.addAction(self.save_as_action)
+        self.toolbar.addAction(self.configure_action)
 
     def _about_callback(self):
         QMessageBox.about(self, "About Moulder",

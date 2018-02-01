@@ -74,7 +74,6 @@ class ConfigureMeassurementDialog(QDialog):
         bold_font.setBold(True)
 
         layout = QVBoxLayout()
-        layout.addWidget(QLabel("Create Meassurement Points", font=bold_font))
         layout.addWidget(self.regular_grid_btn)
 
         grid = QGridLayout()
