@@ -39,13 +39,13 @@ class Moulder(FigureCanvasQTAgg):
         'n: New polygon', 'd: delete', 'click: select/move', 'a: add vertex',
         'r: reset view', 'esc: cancel'])
 
-    def __init__(self, parent, area, x, z, density_range=[-2000, 2000],
-                 width=5, height=4, dpi=100):
+    def __init__(self, parent, x, z, min_depth, max_depth,
+                 density_range=[-2000, 2000], width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.fig)
         self.setParent(parent)
 
-        self._area = area
+        self.min_depth, self.max_depth = min_depth, max_depth
         self._x, self._z = x, z
         self.density_range = density_range
         self._predicted = numpy.zeros_like(x)
@@ -87,14 +87,6 @@ class Moulder(FigureCanvasQTAgg):
         self._z = numpy.asarray(new_value)
 
     @property
-    def area(self):
-        return self._area
-
-    @area.setter
-    def area(self, new_area):
-        self._area = new_area
-
-    @property
     def data(self):
         return self._data
 
@@ -134,6 +126,15 @@ class Moulder(FigureCanvasQTAgg):
              for p, d in zip(self.polygons, self.densities)]
         return m
 
+    def set_meassurement_points(self, x, z):
+        self.x = x
+        self.z = z
+        self.modelax.set_xlim(self.x.min(), self.x.max())
+        self.modelax.set_ylim(self.min_depth, self.max_depth)
+        self.predicted_line.remove()
+        self.predicted_line, = self.dataax.plot(self.x, self.predicted, '-r')
+        self._update_data_plot()
+
     def _figure_setup(self):
         self.dataax, self.modelax = self.fig.subplots(2, 1, sharex=True)
         self.dataax.set_ylabel("Gravity Anomaly [mGal]")
@@ -141,8 +142,8 @@ class Moulder(FigureCanvasQTAgg):
         self.dataax.grid(True)
         self.modelax.set_xlabel("x [m]")
         self.modelax.set_ylabel("z [m]")
-        self.modelax.set_xlim(self.area[:2])
-        self.modelax.set_ylim(self.area[2:])
+        self.modelax.set_xlim(self.x.min(), self.x.max())
+        self.modelax.set_ylim(self.min_depth, self.max_depth)
         self.modelax.grid(True)
         self.modelax.invert_yaxis()
         self.predicted_line, = self.dataax.plot(self.x, self.predicted, '-r')
@@ -477,8 +478,8 @@ class Moulder(FigureCanvasQTAgg):
                     line.set_color([0, 0, 0, 0])
             self.canvas.draw()
         elif event_key == 'r':
-            self.modelax.set_xlim(self.area[:2])
-            self.modelax.set_ylim(self.area[2:])
+            self.modelax.set_xlim(self.x.min(), self.x.max())
+            self.modelax.set_ylim(self.min_depth, self.max_depth)
             self._update_data_plot()
         elif event_key == 'a':
             self._add_vertex = not self._add_vertex

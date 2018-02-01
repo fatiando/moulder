@@ -16,7 +16,7 @@ from PyQt5.QtWidgets import QDialogButtonBox
 
 from figure_canvas import GravityModelCanvas
 from interactive import Moulder
-from new_dialog import NewModelDialog
+from configure_dialog import ConfigureMeassurementDialog
 
 
 class MoulderApp(QMainWindow):
@@ -29,21 +29,20 @@ class MoulderApp(QMainWindow):
         self.init_ui()
         self.set_callbacks()
 
-        self.canvas = Moulder(self, [0, 100, 0, 1000],
-                              numpy.linspace(0, 100, 11),
-                              numpy.zeros(11),
-                              width=5, height=4, dpi=100)
-        #self.canvas = GravityModelCanvas(self,
+        self.moulder = Moulder(self, numpy.linspace(0, 100, 11),
+                               numpy.zeros(11), 0, 1000,
+                               width=5, height=4, dpi=100)
+        #self.moulder = GravityModelCanvas(self,
         #                                 width=5, height=4, dpi=100)
-        # self.canvas.setFocus()
-        self.setCentralWidget(self.canvas)
+        # self.moulder.setFocus()
+        self.setCentralWidget(self.moulder)
 
     def keyPressEvent(self, event):
         keys_dict = {Qt.Key_N: "n", Qt.Key_R: "r",
                      Qt.Key_A: "a", Qt.Key_D: "d",
                      Qt.Key_Escape: "escape"}
         if event.key() in keys_dict.keys():
-            self.canvas._key_press_callback(keys_dict[event.key()])
+            self.moulder._key_press_callback(keys_dict[event.key()])
 
     def closeEvent(self, event):
         event.ignore()
@@ -55,15 +54,15 @@ class MoulderApp(QMainWindow):
         self._configure_toolbar()
 
     def set_callbacks(self):
-        self.new_action.triggered.connect(self._new_model_callback)
+        self.configure_action.triggered.connect(
+            self._configure_meassurement_callback)
         self.about_action.triggered.connect(self._about_callback)
         # self.file_menu.triggered.connect(self._file_menu_callback)
         self.quit_action.triggered.connect(self._quit_callback)
 
     def _define_actions(self):
-        self.new_action = QAction(QIcon.fromTheme('document-new'),
-                                  '&New model', self)
-        self.new_action.setShortcut('Ctrl+N')
+        self.configure_action = QAction(QIcon.fromTheme('preferences-system'),
+                                  '&Configure Meassurement Points', self)
         self.open_action = QAction(QIcon.fromTheme('document-open'),
                                    '&Open model', self)
         self.open_action.setShortcut('Ctrl+O')
@@ -89,7 +88,7 @@ class MoulderApp(QMainWindow):
 
     def _configure_toolbar(self):
         self.toolbar = self.addToolBar("adasd")
-        self.toolbar.addAction(self.new_action)
+        self.toolbar.addAction(self.configure_action)
         self.toolbar.addAction(self.open_action)
         self.toolbar.addAction(self.save_action)
         self.toolbar.addAction(self.save_as_action)
@@ -98,14 +97,12 @@ class MoulderApp(QMainWindow):
         QMessageBox.about(self, "About Moulder",
                           "About Moulder\nVersion 0.1")
 
-    def _new_model_callback(self):
-        new_model_dialog = NewModelDialog(parent=self)
-        new_model_dialog.exec_()
-        if new_model_dialog.is_completed():
-            self.canvas.x = new_model_dialog.x
-            self.canvas.z = new_model_dialog.z
-            self.canvas.run()
-            self.setCentralWidget(self.canvas)
+    def _configure_meassurement_callback(self):
+        configure_dialog = ConfigureMeassurementDialog(self)
+        configure_dialog.exec_()
+        if configure_dialog.is_completed():
+            self.moulder.set_meassurement_points(configure_dialog.x,
+                                                 configure_dialog.z)
 
     def _quit_callback(self):
         answer = QMessageBox.question(self, "Quit",
@@ -118,6 +115,6 @@ class MoulderApp(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setApplicationName("Moulder")
-    moulder = MoulderApp()
-    moulder.show()
+    moulder_app = MoulderApp()
+    moulder_app.show()
     sys.exit(app.exec_())

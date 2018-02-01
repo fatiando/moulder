@@ -15,19 +15,19 @@ from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QDialog, QPushButton
 from PyQt5.QtWidgets import QDialogButtonBox, QGridLayout, QRadioButton, QLineEdit
 
 
-class NewModelDialog(QDialog):
+class ConfigureMeassurementDialog(QDialog):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent):
         super().__init__(parent)
         self.setModal(False)
-        self.setWindowTitle("Create New Model")
+        self.setWindowTitle("Configure Meassurement Points")
         self._completed = False
         self._init_ui()
 
         self.regular_grid_btn.toggled.connect(self._radio_button_callback)
         self.custom_grid_btn.toggled.connect(self._radio_button_callback)
         self.cancel_btn.clicked.connect(self._button_pushed_callback)
-        self.ok_btn.clicked.connect(self._button_pushed_callback)
+        self.apply_btn.clicked.connect(self._button_pushed_callback)
 
     @property
     def x(self):
@@ -66,9 +66,9 @@ class NewModelDialog(QDialog):
         self.to_input = QLineEdit()
         self.step_input = QLineEdit()
         self.height_input = QLineEdit()
-        self.ok_btn = QPushButton("Ok")
+        self.apply_btn = QPushButton("Apply Changes")
         self.cancel_btn = QPushButton("Cancel")
-        self.ok_btn.setDefault(True)
+        self.apply_btn.setDefault(True)
 
         bold_font = QFont()
         bold_font.setBold(True)
@@ -94,7 +94,7 @@ class NewModelDialog(QDialog):
         hbox = QHBoxLayout()
         hbox.setAlignment(Qt.AlignRight)
         hbox.addWidget(self.cancel_btn)
-        hbox.addWidget(self.ok_btn)
+        hbox.addWidget(self.apply_btn)
         layout.addLayout(hbox)
 
         self.setLayout(layout)
@@ -103,7 +103,7 @@ class NewModelDialog(QDialog):
         sender_text = self.sender().text()
         if sender_text == "Cancel":
             self.close()
-        elif sender_text == "Ok":
+        elif sender_text == "Apply Changes":
             filled_entries = self._check_filled_entries()
             if filled_entries:
                 self._completed = True
