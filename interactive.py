@@ -130,7 +130,7 @@ class Moulder(FigureCanvasQTAgg):
         self.x = x
         self.z = z
         self.modelax.set_xlim(self.x.min(), self.x.max())
-        self.modelax.set_ylim(self.min_depth, self.max_depth)
+        self.modelax.set_ylim(self.max_depth, self.min_depth) # y inverted axe
         self.predicted_line.remove()
         self.predicted_line, = self.dataax.plot(self.x, self.predicted, '-r')
         self._update_data_plot()
