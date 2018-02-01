@@ -29,10 +29,19 @@ class MoulderApp(QMainWindow):
         self.init_ui()
         self.set_callbacks()
 
+        self.canvas = Moulder(self, width=5, height=4, dpi=100)
         #self.canvas = GravityModelCanvas(self,
         #                                 width=5, height=4, dpi=100)
-        #self.canvas.setFocus()
-        #self.setCentralWidget(self.canvas)
+        # self.canvas.setFocus()
+        self.setCentralWidget(self.canvas)
+
+    def keyPressEvent(self, event):
+        print(event)
+        keys_dict = {Qt.Key_N: "n", Qt.Key_R: "r",
+                     Qt.Key_A: "a", Qt.Key_D: "d",
+                     Qt.Key_Escape: "escape"}
+        if self.canvas.plotted and event.key in keys_dict.keys():
+            self.canvas.key_press_callback(keys_dict[event.key])
 
     def closeEvent(self, event):
         event.ignore()
@@ -91,10 +100,8 @@ class MoulderApp(QMainWindow):
         new_model_dialog = NewModelDialog(parent=self)
         new_model_dialog.exec_()
         if new_model_dialog.is_completed():
-            x = new_model_dialog.x
-            z = new_model_dialog.z
-            area = (x.min(), x.max(), z.min(), 10000)
-            self.canvas = Moulder(self, area, x, z)
+            self.canvas.x = new_model_dialog.x
+            self.canvas.z = new_model_dialog.z
             self.canvas.run()
             self.setCentralWidget(self.canvas)
 
