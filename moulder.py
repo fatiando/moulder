@@ -42,8 +42,8 @@ class MoulderApp(QMainWindow):
         keys_dict = {Qt.Key_N: "n", Qt.Key_R: "r",
                      Qt.Key_A: "a", Qt.Key_D: "d",
                      Qt.Key_Escape: "escape"}
-        if event.key in keys_dict.keys():
-            self.canvas._key_press_callback(keys_dict[event.key])
+        if event.key() in keys_dict.keys():
+            self.canvas._key_press_callback(keys_dict[event.key()])
 
     def closeEvent(self, event):
         event.ignore()

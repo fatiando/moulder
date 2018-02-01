@@ -39,13 +39,15 @@ class Moulder(FigureCanvasQTAgg):
         'n: New polygon', 'd: delete', 'click: select/move', 'a: add vertex',
         'r: reset view', 'esc: cancel'])
 
-    def __init__(self, parent, area, x, z, width=5, height=4, dpi=100):
+    def __init__(self, parent, area, x, z, density_range=[-2000, 2000],
+                 width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         super().__init__(self.fig)
         self.setParent(parent)
 
         self._area = area
         self._x, self._z = x, z
+        self.density_range = density_range
         self._predicted = numpy.zeros_like(x)
         self._data = None
         self.cmap = pyplot.cm.RdBu_r
@@ -59,6 +61,10 @@ class Moulder(FigureCanvasQTAgg):
         # It will be determined by sliders/entries in MoulderApp
         self._density = 100
         self._error = 0
+
+        # Data min and max (only for first implementations)
+        # They will be determined when data is imported
+        self.dmin, self.dmax = 0, 0
 
         self._figure_setup()
         self._init_markers()
@@ -139,6 +145,7 @@ class Moulder(FigureCanvasQTAgg):
         self.modelax.set_ylim(self.area[2:])
         self.modelax.grid(True)
         self.modelax.invert_yaxis()
+        self.predicted_line, = self.dataax.plot(self.x, self.predicted, '-r')
         self.canvas.draw()
 
     def _init_markers(self):
@@ -205,7 +212,7 @@ class Moulder(FigureCanvasQTAgg):
         poly = patches.Polygon(vertices, animated=False, alpha=0.9,
                                color=self._density2color(density))
         x, y = list(zip(*poly.xy))
-        line = Line2D(x, y, **self.line_args)
+        line = Line2D(x, y, **LINE_ARGS)
         return poly, line
 
     def _update_data_plot(self):
@@ -236,7 +243,7 @@ class Moulder(FigureCanvasQTAgg):
         if self._ipoly is not None:
             self.densities[self._ipoly] = value
             self.polygons[self._ipoly].set_color(self._density2color(value))
-            self._update_data()
+            # self._update_data()
             self._update_data_plot()
             self.canvas.draw()
 
@@ -346,7 +353,7 @@ class Moulder(FigureCanvasQTAgg):
                     self.modelax.add_line(line)
                     self.lines[self._ipoly].set_color([0, 1, 0, 0])
                     self.canvas.draw()
-                    self._update_data()
+                    # self._update_data()
                     self._update_data_plot()
         elif self._drawing:
             if event.button == 1:
@@ -371,7 +378,7 @@ class Moulder(FigureCanvasQTAgg):
                     self.lines[self._ipoly].set_color([0, 1, 0, 0])
                     self.dataax.set_title(self.instructions)
                     self.canvas.draw()
-                    self._update_data()
+                    # self._update_data()
                     self._update_data_plot()
 
     def _button_release_callback(self, event):
@@ -395,7 +402,7 @@ class Moulder(FigureCanvasQTAgg):
         # self._ipoly is only released when clicking outside
         # the polygons
         self._lastevent = None
-        self._update_data()
+        # self._update_data()
         self._update_data_plot()
 
     def _key_press_callback(self, event_key):
@@ -420,7 +427,7 @@ class Moulder(FigureCanvasQTAgg):
                     poly.xy = numpy.array([xy for i, xy in enumerate(poly.xy)
                                            if i not in verts])
                     line.set_data(list(zip(*poly.xy)))
-                    self._update_data()
+                    # self._update_data()
                     self._update_data_plot()
                     self.canvas.restore_region(self.background)
                     self.modelax.draw_artist(poly)
@@ -435,7 +442,7 @@ class Moulder(FigureCanvasQTAgg):
                 self.densities.pop(self._ipoly)
                 self._ipoly = None
                 self.canvas.draw()
-                self._update_data()
+                # self._update_data()
                 self._update_data_plot()
         elif event_key == 'n':
             self._ivert = None
@@ -448,7 +455,7 @@ class Moulder(FigureCanvasQTAgg):
             self.background = self.canvas.copy_from_bbox(self.modelax.bbox)
             self._drawing = True
             self._xy = []
-            self._drawing_plot = Line2D([], [], **self.line_args)
+            self._drawing_plot = Line2D([], [], **LINE_ARGS)
             self._drawing_plot.set_animated(True)
             self.modelax.add_line(self._drawing_plot)
             self.dataax.set_title(' | '.join([
