@@ -84,9 +84,9 @@ class MoulderApp(QMainWindow):
                                    '&Quit', self)
         self.quit_action.setShortcut('Ctrl+Q')
         self.about_action = QAction("&About", self)
-        self.new_polygon_action = QAction(QIcon.fromTheme("window-new"),
+        self.new_polygon_action = QAction(QIcon.fromTheme("list-add"),
                                              "&New Polygon", self)
-        self.delete_polygon_action = QAction(QIcon.fromTheme("window-close"),
+        self.delete_polygon_action = QAction(QIcon.fromTheme("list-remove"),
                                              "&Delete Polygon", self)
         self.add_vertex_action = QAction(QIcon.fromTheme("document-new"),
                                          "&Add Vertex", self)
