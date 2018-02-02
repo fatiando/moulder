@@ -15,11 +15,12 @@ from matplotlib.lines import Line2D
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtWidgets import QSizePolicy, QMainWindow, QApplication, QAction
 from PyQt5.QtWidgets import QMenu, QWidget, QVBoxLayout, QMessageBox
 from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QDialog
 from PyQt5.QtWidgets import QDialogButtonBox
+
 
 from fatiando import utils
 from fatiando.gravmag import talwani
@@ -38,6 +39,9 @@ class Moulder(FigureCanvasQTAgg):
     instructions = ' | '.join([
         'n: New polygon', 'd: delete', 'click: select/move', 'a: add vertex',
         'r: reset view', 'esc: cancel'])
+
+    # Signal when selected polygon changes
+    polygon_selected = pyqtSignal(float)
 
     def __init__(self, parent, x, z, min_depth, max_depth,
                  density_range=[-2000, 2000], width=5, height=4, dpi=100):
@@ -322,6 +326,8 @@ class Moulder(FigureCanvasQTAgg):
                 # and which vertice of which polygon
                 self._ipoly, self._ivert = self._get_polygon_vertice_id(event)
                 if self._ipoly is not None:
+                    # Emit signal: selected polygon changed (sends density)
+                    self.polygon_selected.emit(self.densities[self._ipoly])
                     # self.density_slider.set_val(self.densities[self._ipoly])
                     self.polygons[self._ipoly].set_animated(True)
                     self.lines[self._ipoly].set_animated(True)

@@ -30,13 +30,13 @@ class MoulderApp(QMainWindow):
         self.setWindowIcon(QIcon.fromTheme('python-logo'))
         self.setGeometry(200, 200, 1024, 800)
         self.init_ui()
-        self.set_callbacks()
 
         self.moulder = Moulder(self, numpy.linspace(0, 100e3, 101),
                                numpy.zeros(101), 0, 10000,
                                density_range=DENSITY_RANGE,
                                width=5, height=4, dpi=100)
         self.setCentralWidget(self.moulder)
+        self.set_callbacks()
 
     def keyPressEvent(self, event):
         keys_dict = {Qt.Key_N: "n", Qt.Key_R: "r",
@@ -68,6 +68,7 @@ class MoulderApp(QMainWindow):
             self._spin_slider_changed_callback)
         self.error_spinbox.valueChanged.connect(
             self._spin_slider_changed_callback)
+        self.moulder.polygon_selected.connect(self._change_density_callback)
 
     def _define_actions(self):
         self.configure_action = QAction(QIcon.fromTheme('preferences-system'),
@@ -165,6 +166,10 @@ class MoulderApp(QMainWindow):
         elif sender == self.error_spinbox:
             self.error_slider.setValue(self.error_slider.float_2_int(value))
             self.moulder.error = value
+
+    def _change_density_callback(self, value):
+        self.density_spinbox.setValue(value)
+        self.density_slider.setValue(value)
 
     def _quit_callback(self):
         answer = QMessageBox.question(self, "Quit",
