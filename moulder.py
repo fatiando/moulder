@@ -7,6 +7,7 @@ import numpy
 import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QSizePolicy, QMainWindow, QApplication, QAction
@@ -28,15 +29,21 @@ class MoulderApp(QMainWindow):
         super().__init__()
         self.setWindowTitle("Moulder")
         self.setWindowIcon(QIcon.fromTheme('python-logo'))
-        self.setGeometry(200, 200, 1024, 800)
+        self.setGeometry(200, 200, 1024, 700)
         self.init_ui()
 
+        widget = QWidget()
+        layout = QVBoxLayout()
         self.moulder = Moulder(self, numpy.linspace(0, 100e3, 101),
                                numpy.zeros(101), 0, 10000,
                                density_range=DENSITY_RANGE,
                                width=5, height=4, dpi=100)
-        self.setCentralWidget(self.moulder)
         self.moulder.setFocusPolicy(Qt.StrongFocus)
+        self.navigation_bar = NavigationToolbar2QT(self.moulder, widget)
+        layout.addWidget(self.moulder)
+        layout.addWidget(self.navigation_bar)
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
         self.set_callbacks()
 
     def closeEvent(self, event):
