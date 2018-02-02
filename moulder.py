@@ -120,13 +120,13 @@ class MoulderApp(QMainWindow):
 
         self.error_slider = QSlider(Qt.Horizontal)
         self.error_slider.setMinimum(0)
-        self.error_slider.setMaximum(100)
+        self.error_slider.setMaximum(5)
         self.error_slider.setValue(0)
-        self.error_slider.setTickInterval(10)
+        self.error_slider.setTickInterval(0.5)
         self.error_slider.setTickPosition(QSlider.TicksBelow)
         self.error_spinbox = QDoubleSpinBox()
         self.error_spinbox.setMinimum(0)
-        self.error_spinbox.setMaximum(100)
+        self.error_spinbox.setMaximum(5)
         self.error_spinbox.setValue(0)
         self.error_spinbox.setSingleStep(0.1)
 

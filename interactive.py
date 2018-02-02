@@ -59,7 +59,7 @@ class Moulder(FigureCanvasQTAgg):
 
         # Set arbitrary density and error values (only for first implementations)
         # It will be determined by sliders/entries in MoulderApp
-        self._density = 100
+        self._density = 0
         self._error = 0
 
         # Data min and max (only for first implementations)
@@ -114,7 +114,7 @@ class Moulder(FigureCanvasQTAgg):
     def predicted(self):
         self._predicted = talwani.gz(self.x, self.z, self.model)
         if self.error > 0:
-            self._predicted = utils.contaminate(self.predicted, self.error)
+            self._predicted = utils.contaminate(self._predicted, self.error)
         return self._predicted
 
     @property
