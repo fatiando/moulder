@@ -145,6 +145,80 @@ class Moulder(FigureCanvasQTAgg):
              for p, d in zip(self.polygons, self.densities)]
         return m
 
+    def add_vertex(self):
+        self._add_vertex = not self._add_vertex
+
+    def new_polygon(self):
+        self._ivert = None
+        self._ipoly = None
+        for line, poly in zip(self.lines, self.polygons):
+            poly.set_animated(False)
+            line.set_animated(False)
+            line.set_color([0, 0, 0, 0])
+        self.canvas.draw()
+        self.background = self.canvas.copy_from_bbox(self.modelax.bbox)
+        self._drawing = True
+        self._xy = []
+        self._drawing_plot = Line2D([], [], **LINE_ARGS)
+        self._drawing_plot.set_animated(True)
+        self.modelax.add_line(self._drawing_plot)
+        self.dataax.set_title(' | '.join([
+            'left click: set vertice', 'right click: finish',
+            'esc: cancel']))
+        self.canvas.draw()
+
+    def delete_polygon(self):
+        if self._drawing and self._xy:
+            self._xy.pop()
+            if self._xy:
+                self._drawing_plot.set_data(list(zip(*self._xy)))
+            else:
+                self._drawing_plot.set_data([], [])
+            self.canvas.restore_region(self.background)
+            self.modelax.draw_artist(self._drawing_plot)
+            self.canvas.blit(self.modelax.bbox)
+        elif self._ivert is not None:
+            poly = self.polygons[self._ipoly]
+            line = self.lines[self._ipoly]
+            if len(poly.xy) > 4:
+                verts = numpy.atleast_1d(self._ivert)
+                poly.xy = numpy.array([xy for i, xy in enumerate(poly.xy)
+                                       if i not in verts])
+                line.set_data(list(zip(*poly.xy)))
+                # self._update_data()
+                self._update_data_plot()
+                self.canvas.restore_region(self.background)
+                self.modelax.draw_artist(poly)
+                self.modelax.draw_artist(line)
+                self.canvas.blit(self.modelax.bbox)
+                self._ivert = None
+        elif self._ipoly is not None:
+            self.polygons[self._ipoly].remove()
+            self.lines[self._ipoly].remove()
+            self.polygons.pop(self._ipoly)
+            self.lines.pop(self._ipoly)
+            self.densities.pop(self._ipoly)
+            self._ipoly = None
+            self.canvas.draw()
+            # self._update_data()
+            self._update_data_plot()
+
+    def cancel_drawing(self):
+        if self._add_vertex:
+            self._add_vertex = False
+        else:
+            self.dataax.set_title(self.instructions)
+            self._drawing = False
+            self._xy = []
+            if self._drawing_plot is not None:
+                self._drawing_plot.remove()
+                self._drawing_plot = None
+            for line, poly in zip(self.lines, self.polygons):
+                poly.set_animated(False)
+                line.set_animated(False)
+                line.set_color([0, 0, 0, 0])
+        self.canvas.draw()
+
     def set_meassurement_points(self, x, z):
         self.x = x
         self.z = z
@@ -408,85 +482,6 @@ class Moulder(FigureCanvasQTAgg):
         # self._update_data()
         self._update_data_plot()
 
-    def keyPressEvent(self, event):
-        """
-        What to do when a key is pressed on the keyboard.
-        """
-        if event.key() == Qt.Key_D:
-            if self._drawing and self._xy:
-                self._xy.pop()
-                if self._xy:
-                    self._drawing_plot.set_data(list(zip(*self._xy)))
-                else:
-                    self._drawing_plot.set_data([], [])
-                self.canvas.restore_region(self.background)
-                self.modelax.draw_artist(self._drawing_plot)
-                self.canvas.blit(self.modelax.bbox)
-            elif self._ivert is not None:
-                poly = self.polygons[self._ipoly]
-                line = self.lines[self._ipoly]
-                if len(poly.xy) > 4:
-                    verts = numpy.atleast_1d(self._ivert)
-                    poly.xy = numpy.array([xy for i, xy in enumerate(poly.xy)
-                                           if i not in verts])
-                    line.set_data(list(zip(*poly.xy)))
-                    # self._update_data()
-                    self._update_data_plot()
-                    self.canvas.restore_region(self.background)
-                    self.modelax.draw_artist(poly)
-                    self.modelax.draw_artist(line)
-                    self.canvas.blit(self.modelax.bbox)
-                    self._ivert = None
-            elif self._ipoly is not None:
-                self.polygons[self._ipoly].remove()
-                self.lines[self._ipoly].remove()
-                self.polygons.pop(self._ipoly)
-                self.lines.pop(self._ipoly)
-                self.densities.pop(self._ipoly)
-                self._ipoly = None
-                self.canvas.draw()
-                # self._update_data()
-                self._update_data_plot()
-        elif event.key() == Qt.Key_N:
-            self._ivert = None
-            self._ipoly = None
-            for line, poly in zip(self.lines, self.polygons):
-                poly.set_animated(False)
-                line.set_animated(False)
-                line.set_color([0, 0, 0, 0])
-            self.canvas.draw()
-            self.background = self.canvas.copy_from_bbox(self.modelax.bbox)
-            self._drawing = True
-            self._xy = []
-            self._drawing_plot = Line2D([], [], **LINE_ARGS)
-            self._drawing_plot.set_animated(True)
-            self.modelax.add_line(self._drawing_plot)
-            self.dataax.set_title(' | '.join([
-                'left click: set vertice', 'right click: finish',
-                'esc: cancel']))
-            self.canvas.draw()
-        elif event.key() == Qt.Key_Escape:
-            if self._add_vertex:
-                self._add_vertex = False
-            else:
-                self.dataax.set_title(self.instructions)
-                self._drawing = False
-                self._xy = []
-                if self._drawing_plot is not None:
-                    self._drawing_plot.remove()
-                    self._drawing_plot = None
-                for line, poly in zip(self.lines, self.polygons):
-                    poly.set_animated(False)
-                    line.set_animated(False)
-                    line.set_color([0, 0, 0, 0])
-            self.canvas.draw()
-        elif event.key() == Qt.Key_R:
-            self.modelax.set_xlim(self.x.min(), self.x.max())
-            self.modelax.set_ylim(self.max_depth, self.min_depth)
-            self._update_data_plot()
-        elif event.key() == Qt.Key_A:
-            self._add_vertex = not self._add_vertex
-
     def _mouse_move_callback(self, event):
         """
         Handle things when the mouse move.
@@ -515,3 +510,20 @@ class Moulder(FigureCanvasQTAgg):
         self.modelax.draw_artist(self.polygons[p])
         self.modelax.draw_artist(self.lines[p])
         self.canvas.blit(self.modelax.bbox)
+
+    def keyPressEvent(self, event):
+        """
+        What to do when a key is pressed on the keyboard.
+        """
+        if event.key() == Qt.Key_D:
+            self.delete_polygon()
+        elif event.key() == Qt.Key_N:
+            self.new_polygon()
+        elif event.key() == Qt.Key_Escape:
+            self.cancel_drawing()
+        elif event.key() == Qt.Key_R:
+            self.modelax.set_xlim(self.x.min(), self.x.max())
+            self.modelax.set_ylim(self.max_depth, self.min_depth)
+            self._update_data_plot()
+        elif event.key() == Qt.Key_A:
+            self.add_vertex()
