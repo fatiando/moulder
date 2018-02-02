@@ -39,13 +39,6 @@ class MoulderApp(QMainWindow):
         self.moulder.setFocusPolicy(Qt.StrongFocus)
         self.set_callbacks()
 
-    # def keyPressEvent(self, event):
-    #     keys_dict = {Qt.Key_N: "n", Qt.Key_R: "r",
-    #                  Qt.Key_A: "a", Qt.Key_D: "d",
-    #                  Qt.Key_Escape: "escape"}
-    #     if event.key() in keys_dict.keys():
-    #         self.moulder._key_press_callback(keys_dict[event.key()])
-
     def closeEvent(self, event):
         event.ignore()
         self._quit_callback()
