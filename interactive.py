@@ -408,11 +408,11 @@ class Moulder(FigureCanvasQTAgg):
         # self._update_data()
         self._update_data_plot()
 
-    def _key_press_callback(self, event_key):
+    def keyPressEvent(self, event):
         """
         What to do when a key is pressed on the keyboard.
         """
-        if event_key == 'd':
+        if event.key() == Qt.Key_D:
             if self._drawing and self._xy:
                 self._xy.pop()
                 if self._xy:
@@ -447,7 +447,7 @@ class Moulder(FigureCanvasQTAgg):
                 self.canvas.draw()
                 # self._update_data()
                 self._update_data_plot()
-        elif event_key == 'n':
+        elif event.key() == Qt.Key_N:
             self._ivert = None
             self._ipoly = None
             for line, poly in zip(self.lines, self.polygons):
@@ -465,7 +465,7 @@ class Moulder(FigureCanvasQTAgg):
                 'left click: set vertice', 'right click: finish',
                 'esc: cancel']))
             self.canvas.draw()
-        elif event_key == 'escape':
+        elif event.key() == Qt.Key_Escape:
             if self._add_vertex:
                 self._add_vertex = False
             else:
@@ -480,11 +480,11 @@ class Moulder(FigureCanvasQTAgg):
                     line.set_animated(False)
                     line.set_color([0, 0, 0, 0])
             self.canvas.draw()
-        elif event_key == 'r':
+        elif event.key() == Qt.Key_R:
             self.modelax.set_xlim(self.x.min(), self.x.max())
-            self.modelax.set_ylim(self.min_depth, self.max_depth)
+            self.modelax.set_ylim(self.max_depth, self.min_depth)
             self._update_data_plot()
-        elif event_key == 'a':
+        elif event.key() == Qt.Key_A:
             self._add_vertex = not self._add_vertex
 
     def _mouse_move_callback(self, event):
