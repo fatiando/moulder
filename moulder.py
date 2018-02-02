@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QDialog
 from PyQt5.QtWidgets import QDialogButtonBox, QDoubleSpinBox
 
 from figure_canvas import GravityModelCanvas
+from double_slider import QDoubleSlider
 from interactive import Moulder
 from configure_dialog import ConfigureMeassurementDialog
 
@@ -118,11 +119,9 @@ class MoulderApp(QMainWindow):
         self.density_spinbox.setValue(0)
         self.density_spinbox.setSingleStep(1)
 
-        self.error_slider = QSlider(Qt.Horizontal)
-        self.error_slider.setMinimum(0)
-        self.error_slider.setMaximum(5)
-        self.error_slider.setValue(0)
-        self.error_slider.setTickInterval(0.5)
+        self.error_slider = QDoubleSlider(Qt.Horizontal, 0, 5, 0.5,
+                                          init_value=0)
+        self.error_slider.setTickInterval(self.error_slider.float_2_int(0.5))
         self.error_slider.setTickPosition(QSlider.TicksBelow)
         self.error_spinbox = QDoubleSpinBox()
         self.error_spinbox.setMinimum(0)
@@ -160,10 +159,11 @@ class MoulderApp(QMainWindow):
             self.density_slider.setValue(value)
             self.moulder.set_density(value)
         elif sender == self.error_slider:
+            value = self.error_slider.int_2_float(value)
             self.error_spinbox.setValue(value)
             self.moulder.set_error(value)
         elif sender == self.error_spinbox:
-            self.error_slider.setValue(value)
+            self.error_slider.setValue(self.error_slider.float_2_int(value))
             self.moulder.set_error(value)
 
     def _quit_callback(self):
