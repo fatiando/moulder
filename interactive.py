@@ -148,6 +148,7 @@ class Moulder(FigureCanvasQTAgg):
         self._update_data_plot()
 
     def _figure_setup(self):
+        self.dataax.set_title(self.instructions)
         self.dataax.set_ylabel("Gravity Anomaly [mGal]")
         self.dataax.set_ylim((-200, 200))
         self.dataax.grid(True)
@@ -462,6 +463,7 @@ class Moulder(FigureCanvasQTAgg):
             if self._add_vertex:
                 self._add_vertex = False
             else:
+                self.dataax.set_title(self.instructions)
                 self._drawing = False
                 self._xy = []
                 if self._drawing_plot is not None:
