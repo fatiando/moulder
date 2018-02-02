@@ -42,6 +42,7 @@ class Moulder(FigureCanvasQTAgg):
     def __init__(self, parent, x, z, min_depth, max_depth,
                  density_range=[-2000, 2000], width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
+        self.dataax, self.modelax = self.fig.subplots(2, 1, sharex=True)
         super().__init__(self.fig)
         self.setParent(parent)
 
@@ -50,6 +51,7 @@ class Moulder(FigureCanvasQTAgg):
         self.density_range = density_range
         self._predicted = numpy.zeros_like(x)
         self._data = None
+        self.predicted_line = None
         self.cmap = pyplot.cm.RdBu_r
         self.canvas = self.fig.canvas
 
@@ -142,14 +144,10 @@ class Moulder(FigureCanvasQTAgg):
     def set_meassurement_points(self, x, z):
         self.x = x
         self.z = z
-        self.modelax.set_xlim(self.x.min(), self.x.max())
-        self.modelax.set_ylim(self.max_depth, self.min_depth) # y inverted axe
-        self.predicted_line.remove()
-        self.predicted_line, = self.dataax.plot(self.x, self.predicted, '-r')
+        self._figure_setup()
         self._update_data_plot()
 
     def _figure_setup(self):
-        self.dataax, self.modelax = self.fig.subplots(2, 1, sharex=True)
         self.dataax.set_ylabel("Gravity Anomaly [mGal]")
         self.dataax.set_ylim((-200, 200))
         self.dataax.grid(True)
@@ -159,6 +157,8 @@ class Moulder(FigureCanvasQTAgg):
         self.modelax.set_ylim(self.min_depth, self.max_depth)
         self.modelax.grid(True)
         self.modelax.invert_yaxis()
+        if self.predicted_line is not None:
+            self.predicted_line.remove()
         self.predicted_line, = self.dataax.plot(self.x, self.predicted, '-r')
         self.canvas.draw()
 
