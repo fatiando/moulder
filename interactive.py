@@ -99,16 +99,29 @@ class Moulder(FigureCanvasQTAgg):
         return self._density
 
     @density.setter
-    def density(self, new_value):
-        self._density = new_value
+    def density(self, value):
+        """
+        Callback when density slider is edited
+        """
+        self._density = value
+        if self._ipoly is not None:
+            self.densities[self._ipoly] = value
+            self.polygons[self._ipoly].set_color(self._density2color(value))
+            # self._update_data()
+            self._update_data_plot()
+            self.canvas.draw()
 
     @property
     def error(self):
         return self._error
 
     @error.setter
-    def error(self, new_value):
-        self._error = new_value
+    def error(self, value):
+        """
+        Callback when error slider is edited
+        """
+        self._error = value
+        self._update_data_plot()
 
     @property
     def predicted(self):
@@ -134,24 +147,6 @@ class Moulder(FigureCanvasQTAgg):
         self.predicted_line.remove()
         self.predicted_line, = self.dataax.plot(self.x, self.predicted, '-r')
         self._update_data_plot()
-
-    def set_error(self, value):
-        """
-        Callback when error slider is edited
-        """
-        self.error = value
-        self._update_data_plot()
-
-    def set_density(self, value):
-        """
-        Callback when density slider is edited
-        """
-        if self._ipoly is not None:
-            self.densities[self._ipoly] = value
-            self.polygons[self._ipoly].set_color(self._density2color(value))
-            # self._update_data()
-            self._update_data_plot()
-            self.canvas.draw()
 
     def _figure_setup(self):
         self.dataax, self.modelax = self.fig.subplots(2, 1, sharex=True)

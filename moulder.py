@@ -154,17 +154,17 @@ class MoulderApp(QMainWindow):
         sender = self.sender()
         if sender == self.density_slider:
             self.density_spinbox.setValue(value)
-            self.moulder.set_density(value)
+            self.moulder.density = value
         elif sender == self.density_spinbox:
             self.density_slider.setValue(value)
-            self.moulder.set_density(value)
+            self.moulder.density = value
         elif sender == self.error_slider:
             value = self.error_slider.int_2_float(value)
             self.error_spinbox.setValue(value)
-            self.moulder.set_error(value)
+            self.moulder.error = value
         elif sender == self.error_spinbox:
             self.error_slider.setValue(self.error_slider.float_2_int(value))
-            self.moulder.set_error(value)
+            self.moulder.error = value
 
     def _quit_callback(self):
         answer = QMessageBox.question(self, "Quit",
