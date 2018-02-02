@@ -63,8 +63,7 @@ class Moulder(FigureCanvasQTAgg):
         self.lines = []
         self.densities = []
 
-        # Set arbitrary density and error values (only for first implementations)
-        # It will be determined by sliders/entries in MoulderApp
+        # Initialize density and error values
         self._density = 0
         self._error = 0
 
