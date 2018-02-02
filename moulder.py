@@ -54,6 +54,11 @@ class MoulderApp(QMainWindow):
             self._configure_meassurement_callback)
         self.about_action.triggered.connect(self._about_callback)
         self.quit_action.triggered.connect(self._quit_callback)
+        self.moulder.polygon_selected.connect(self._change_density_callback)
+        self.new_polygon_action.triggered.connect(self.moulder.new_polygon)
+        self.add_vertex_action.triggered.connect(self.moulder.add_vertex)
+        self.delete_polygon_action.triggered.connect(
+            self.moulder.delete_polygon)
         self.density_slider.valueChanged.connect(
             self._spin_slider_changed_callback)
         self.density_spinbox.valueChanged.connect(
@@ -62,11 +67,10 @@ class MoulderApp(QMainWindow):
             self._spin_slider_changed_callback)
         self.error_spinbox.valueChanged.connect(
             self._spin_slider_changed_callback)
-        self.moulder.polygon_selected.connect(self._change_density_callback)
 
     def _define_actions(self):
         self.configure_action = QAction(QIcon.fromTheme('preferences-system'),
-                                  '&Configure Meassurement Points', self)
+                                  '&Configure...', self)
         self.open_action = QAction(QIcon.fromTheme('document-open'),
                                    '&Open model', self)
         self.open_action.setShortcut('Ctrl+O')
@@ -80,6 +84,12 @@ class MoulderApp(QMainWindow):
                                    '&Quit', self)
         self.quit_action.setShortcut('Ctrl+Q')
         self.about_action = QAction("&About", self)
+        self.new_polygon_action = QAction(QIcon.fromTheme("window-new"),
+                                             "&New Polygon", self)
+        self.delete_polygon_action = QAction(QIcon.fromTheme("window-close"),
+                                             "&Delete Polygon", self)
+        self.add_vertex_action = QAction(QIcon.fromTheme("document-new"),
+                                         "&Add Vertex", self)
 
     def _configure_menubar(self):
         self.menubar = self.menuBar()
@@ -89,6 +99,10 @@ class MoulderApp(QMainWindow):
         self.file_menu.addAction(self.save_as_action)
         self.file_menu.addAction(self.quit_action)
         self.edit_menu = self.menubar.addMenu('Edit')
+        self.edit_menu.addAction(self.new_polygon_action)
+        self.edit_menu.addAction(self.add_vertex_action)
+        self.edit_menu.addAction(self.delete_polygon_action)
+        self.edit_menu.addSeparator()
         self.edit_menu.addAction(self.configure_action)
         self.about_menu = self.menubar.addMenu('About')
         self.about_menu.addAction(self.about_action)
@@ -99,6 +113,10 @@ class MoulderApp(QMainWindow):
         self.main_toolbar.addAction(self.save_action)
         self.main_toolbar.addAction(self.save_as_action)
         self.main_toolbar.addAction(self.configure_action)
+        self.main_toolbar.addSeparator()
+        self.main_toolbar.addAction(self.new_polygon_action)
+        self.main_toolbar.addAction(self.add_vertex_action)
+        self.main_toolbar.addAction(self.delete_polygon_action)
 
     def _configure_secondary_toolbar(self):
         self.density_slider = QSlider(Qt.Horizontal)
