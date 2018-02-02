@@ -111,7 +111,7 @@ class MoulderApp(QMainWindow):
         self.density_slider.setMaximum(DENSITY_RANGE[1])
         self.density_slider.setValue(0)
         self.density_slider.setTickInterval(
-            (DENSITY_RANGE[1] - DENSITY_RANGE[0])/2)
+            (DENSITY_RANGE[1] - DENSITY_RANGE[0])/10)
         self.density_slider.setTickPosition(QSlider.TicksBelow)
         self.density_spinbox = QDoubleSpinBox()
         self.density_spinbox.setMinimum(DENSITY_RANGE[0])
