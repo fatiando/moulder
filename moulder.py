@@ -1,21 +1,15 @@
 from __future__ import print_function, division
 from future.builtins import super
 
-import os
 import sys
 import numpy
-import matplotlib
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QSizePolicy, QMainWindow, QApplication, QAction
-from PyQt5.QtWidgets import QMenu, QWidget, QVBoxLayout, QMessageBox
-from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QDialog
-from PyQt5.QtWidgets import QDialogButtonBox, QDoubleSpinBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QAction
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QMessageBox, QDoubleSpinBox
+from PyQt5.QtWidgets import QSlider, QLabel
 
-from figure_canvas import GravityModelCanvas
 from double_slider import QDoubleSlider
 from interactive import Moulder
 from configure_dialog import ConfigureMeassurementDialog
@@ -77,7 +71,7 @@ class MoulderApp(QMainWindow):
 
     def _define_actions(self):
         self.configure_action = QAction(QIcon.fromTheme('preferences-system'),
-                                  '&Configure...', self)
+                                        '&Configure...', self)
         self.open_action = QAction(QIcon.fromTheme('document-open'),
                                    '&Open model', self)
         self.open_action.setShortcut('Ctrl+O')
@@ -92,7 +86,7 @@ class MoulderApp(QMainWindow):
         self.quit_action.setShortcut('Ctrl+Q')
         self.about_action = QAction("&About", self)
         self.new_polygon_action = QAction(QIcon.fromTheme("list-add"),
-                                             "&New Polygon", self)
+                                          "&New Polygon", self)
         self.delete_polygon_action = QAction(QIcon.fromTheme("list-remove"),
                                              "&Delete Polygon", self)
         self.add_vertex_action = QAction(QIcon.fromTheme("document-new"),

@@ -1,18 +1,9 @@
 from __future__ import print_function
 from future.builtins import super
 
-import os
-import sys
-import numpy
-import matplotlib
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QSizePolicy, QMainWindow, QApplication, QAction
-from PyQt5.QtWidgets import QMenu, QWidget, QVBoxLayout, QMessageBox
-from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QDialog
-from PyQt5.QtWidgets import QDialogButtonBox
+from PyQt5.QtWidgets import QSizePolicy
 
 
 class GravityModelCanvas(FigureCanvasQTAgg):

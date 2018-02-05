@@ -1,26 +1,12 @@
 from __future__ import division, absolute_import
 from future.builtins import super, zip
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-
-import os
-import sys
 import numpy
-import matplotlib
-from matplotlib import pyplot, widgets, patches
+from matplotlib import pyplot, patches
 from matplotlib.lines import Line2D
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QSizePolicy, QMainWindow, QApplication, QAction
-from PyQt5.QtWidgets import QMenu, QWidget, QVBoxLayout, QMessageBox
-from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QDialog
-from PyQt5.QtWidgets import QDialogButtonBox
-
 
 from fatiando import utils
 from fatiando.gravmag import talwani

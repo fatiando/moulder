@@ -1,18 +1,12 @@
 from __future__ import print_function
 from future.builtins import super
 
-import os
-import sys
 import numpy
-import matplotlib
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QSizePolicy, QMainWindow, QApplication, QAction
-from PyQt5.QtWidgets import QMenu, QWidget, QVBoxLayout, QMessageBox
-from PyQt5.QtWidgets import QSlider, QHBoxLayout, QLabel, QDialog, QPushButton
-from PyQt5.QtWidgets import QDialogButtonBox, QGridLayout, QRadioButton, QLineEdit
+from PyQt5.QtWidgets import QHBoxLayout, QVBoxLayout, QMessageBox, QLabel
+from PyQt5.QtWidgets import QDialog, QPushButton, QRadioButton
+from PyQt5.QtWidgets import QGridLayout, QLineEdit
 
 
 class ConfigureMeassurementDialog(QDialog):
