@@ -29,7 +29,7 @@ class ConfigureMeassurementDialog(QDialog):
             entries = self._read_regular_grid_entries()
             if entries:
                 x1, x2, step, z = entries[:]
-                return numpy.arange(x1, x2, step, dtype=numpy.float64)
+                return numpy.arange(x1, x2 + step/2, step, dtype=numpy.float64)
             else:
                 return None
         elif self.custom_grid_btn.isChecked():
