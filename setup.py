@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 
 setup(name='moulder',
@@ -9,7 +7,7 @@ setup(name='moulder',
       author='',
       author_email='',
       url='http://www.fatiando.org',
-      packages=['moulder'],
+      packages=find_packages(),
       entry_points={
           'console_scripts': ['moulder=moulder.__init__:main']
       }
