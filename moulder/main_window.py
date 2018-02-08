@@ -6,13 +6,13 @@ import numpy
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QApplication, QAction
+from PyQt5.QtWidgets import QMainWindow, QAction
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QMessageBox, QDoubleSpinBox
 from PyQt5.QtWidgets import QSlider, QLabel
 
-from double_slider import QDoubleSlider
-from interactive import Moulder
-from configure_dialog import ConfigureMeassurementDialog
+from .double_slider import QDoubleSlider
+from .interactive import Moulder
+from .configure_dialog import ConfigureMeassurementDialog
 
 DENSITY_RANGE = [-2000, 2000]
 
@@ -190,11 +190,3 @@ class MoulderApp(QMainWindow):
                                       QMessageBox.Yes, QMessageBox.No)
         if answer == QMessageBox.Yes:
             sys.exit()
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setApplicationName("Moulder")
-    moulder_app = MoulderApp()
-    moulder_app.show()
-    sys.exit(app.exec_())
