@@ -1,0 +1,9 @@
+# TODO
+
+[ ] Keep Create Polygon and Add Vertex buttons pressed (as On/Off modes)
+[ ] Import data
+[ ] Save model (Polygons + Meassurement grid)
+[ ] Load model
+[ ] NavigationBar hide some buttons
+[ ] Refresh view button
+[ ] Modelax area setter
