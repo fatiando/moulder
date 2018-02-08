@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, absolute_import
 from future.builtins import super
 
 from PyQt5.QtWidgets import QSlider

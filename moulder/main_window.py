@@ -1,4 +1,4 @@
-from __future__ import print_function, division
+from __future__ import print_function, division, absolute_import
 from future.builtins import super
 
 import sys
@@ -10,9 +10,8 @@ from PyQt5.QtWidgets import QMainWindow, QAction
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QMessageBox, QDoubleSpinBox
 from PyQt5.QtWidgets import QSlider, QLabel
 
-from .double_slider import QDoubleSlider
+from .ui import QDoubleSlider, ConfigureMeassurementDialog
 from .moulder import Moulder
-from .configure_dialog import ConfigureMeassurementDialog
 
 DENSITY_RANGE = [-2000, 2000]
 
