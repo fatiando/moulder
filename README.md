@@ -42,12 +42,18 @@ environment with:
 source activate moulder
 ```
 
+# Install
+
+Install Moulder through `pip`:
+
+```
+pip install .
+```
+
 # Running
 
 In order to run `Moulder`, just run:
 
 ```
-python moulder.py
+moulder
 ```
-
-in the `moulder` directory.
