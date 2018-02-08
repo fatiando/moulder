@@ -22,5 +22,6 @@ dependencies:
     - cython
     - sphinx-gallery
     - sphinx_bootstrap_theme
+    - pyqt
     - pip:
       - "git+git://github.com/santis19/fatiando@polygon_orientation"
