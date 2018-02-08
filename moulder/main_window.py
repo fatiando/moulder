@@ -11,7 +11,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QMessageBox, QDoubleSpinBox
 from PyQt5.QtWidgets import QSlider, QLabel
 
 from .double_slider import QDoubleSlider
-from .interactive import Moulder
+from .moulder import Moulder
 from .configure_dialog import ConfigureMeassurementDialog
 
 DENSITY_RANGE = [-2000, 2000]
