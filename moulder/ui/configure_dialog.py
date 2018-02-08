@@ -38,11 +38,15 @@ class ConfigureMeassurementDialog(QDialog):
 
     @property
     def z(self):
+        """
+        Returns z array with meassurement points' heights.
+        These heights respect the z->DOWN coordinate system
+        """
         if self.regular_grid_btn.isChecked():
             entries = self._read_regular_grid_entries()
             if entries:
                 x1, x2, step, z = entries[:]
-                return z*numpy.ones_like(self.x)
+                return -z*numpy.ones_like(self.x)
             else:
                 return None
         elif self.custom_grid_btn.isChecked():
@@ -78,7 +82,7 @@ class ConfigureMeassurementDialog(QDialog):
         grid.addWidget(self.to_input, 0, 3)
         grid.addWidget(QLabel("Step:"), 0, 4)
         grid.addWidget(self.step_input, 0, 5)
-        grid.addWidget(QLabel("Height:"), 1, 0)
+        grid.addWidget(QLabel("Meassurement Height:"), 1, 0)
         grid.addWidget(self.height_input, 1, 1, 1, 5)
         layout.addLayout(grid)
 
