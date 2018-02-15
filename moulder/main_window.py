@@ -56,6 +56,7 @@ class MoulderApp(QMainWindow):
         self.quit_action.triggered.connect(self._quit_callback)
         self.moulder.polygon_selected.connect(self._change_density_callback)
         self.moulder.drawing_mode.connect(self._drawing_mode_callback)
+        self.moulder.add_vertex_mode.connect(self._add_vertex_mode_callback)
         self.new_polygon_action.triggered.connect(self.moulder.new_polygon)
         self.add_vertex_action.triggered.connect(self.moulder.add_vertex)
         self.delete_polygon_action.triggered.connect(
@@ -68,6 +69,12 @@ class MoulderApp(QMainWindow):
             self._spin_slider_changed_callback)
         self.error_spinbox.valueChanged.connect(
             self._spin_slider_changed_callback)
+
+    def _add_vertex_mode_callback(self, add_vertex):
+        if add_vertex and self.add_vertex_action.isChecked() is False:
+            self.add_vertex_action.setChecked(True)
+        elif not add_vertex and self.add_vertex_action.isChecked() is True:
+            self.add_vertex_action.setChecked(False)
 
     def _drawing_mode_callback(self, drawing):
         if drawing and self.new_polygon_action.isChecked() is False:
@@ -94,10 +101,11 @@ class MoulderApp(QMainWindow):
         self.new_polygon_action = QAction(QIcon.fromTheme("list-add"),
                                           "&New Polygon", self)
         self.new_polygon_action.setCheckable(True)
-        self.delete_polygon_action = QAction(QIcon.fromTheme("list-remove"),
-                                             "&Delete Polygon", self)
         self.add_vertex_action = QAction(QIcon.fromTheme("document-new"),
                                          "&Add Vertex", self)
+        self.add_vertex_action.setCheckable(True)
+        self.delete_polygon_action = QAction(QIcon.fromTheme("list-remove"),
+                                             "&Delete Polygon", self)
 
     def _configure_menubar(self):
         self.menubar = self.menuBar()

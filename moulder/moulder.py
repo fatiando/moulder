@@ -29,7 +29,7 @@ class Moulder(FigureCanvasQTAgg):
     # Signal when selected polygon changes
     polygon_selected = pyqtSignal(float)
     drawing_mode = pyqtSignal(bool)
-    add_vertex_signal = pyqtSignal()
+    add_vertex_mode = pyqtSignal(bool)
 
     def __init__(self, parent, x, z, min_depth, max_depth,
                  density_range=[-2000, 2000], width=5, height=4, dpi=100):
@@ -134,6 +134,7 @@ class Moulder(FigureCanvasQTAgg):
 
     def add_vertex(self):
         self._add_vertex = not self._add_vertex
+        # self.add_vertex_mode.emit(True)
 
     def new_polygon(self):
         self._ivert = None
@@ -190,10 +191,12 @@ class Moulder(FigureCanvasQTAgg):
             self.canvas.draw()
             # self._update_data()
             self._update_data_plot()
+            self.add_vertex_mode.emit(False)
 
     def cancel_drawing(self):
         if self._add_vertex:
             self._add_vertex = False
+            self.add_vertex_mode.emit(False)
         else:
             self.dataax.set_title(self.instructions)
             self._drawing = False
@@ -459,6 +462,7 @@ class Moulder(FigureCanvasQTAgg):
             return
         if self._add_vertex:
             self._add_vertex = False
+            self.add_vertex_mode.emit(False)
         if self._ivert is None and self._ipoly is None:
             return
         self.background = None
