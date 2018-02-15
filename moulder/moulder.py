@@ -28,6 +28,8 @@ class Moulder(FigureCanvasQTAgg):
 
     # Signal when selected polygon changes
     polygon_selected = pyqtSignal(float)
+    drawing_mode = pyqtSignal(bool)
+    add_vertex_signal = pyqtSignal()
 
     def __init__(self, parent, x, z, min_depth, max_depth,
                  density_range=[-2000, 2000], width=5, height=4, dpi=100):
@@ -143,6 +145,7 @@ class Moulder(FigureCanvasQTAgg):
         self.canvas.draw()
         self.background = self.canvas.copy_from_bbox(self.modelax.bbox)
         self._drawing = True
+        self.drawing_mode.emit(self._drawing)
         self._xy = []
         self._drawing_plot = Line2D([], [], **LINE_ARGS)
         self._drawing_plot.set_animated(True)
@@ -194,6 +197,7 @@ class Moulder(FigureCanvasQTAgg):
         else:
             self.dataax.set_title(self.instructions)
             self._drawing = False
+            self.drawing_mode.emit(self._drawing)
             self._xy = []
             if self._drawing_plot is not None:
                 self._drawing_plot.remove()
@@ -231,6 +235,7 @@ class Moulder(FigureCanvasQTAgg):
         self._ipoly = None
         self._lastevent = None
         self._drawing = False
+        self.drawing_mode.emit(self._drawing)
         self._add_vertex = False
         self._xy = []
         self._drawing_plot = None
@@ -436,6 +441,7 @@ class Moulder(FigureCanvasQTAgg):
                     self._drawing_plot = None
                     self._xy = None
                     self._drawing = False
+                    self.drawing_mode.emit(self._drawing)
                     self._ipoly = len(self.polygons) - 1
                     self.lines[self._ipoly].set_color([0, 1, 0, 0])
                     self.dataax.set_title(self.instructions)
